@@ -241,6 +241,7 @@ GEM
     minitest (5.11.3)
     multi_json (1.12.1)
     multi_test (0.1.2)
+    multipart-parser (0.1.1)
     net-ldap (0.16.1)
     netrc (0.11.0)
     nokogiri (1.10.4)
@@ -484,6 +485,7 @@ DEPENDENCIES
   kubeclient
   listen
   loofah (>= 2.2.3)
+  multipart-parser
   net-ldap
   nokogiri (>= 1.8.2)
   openid_connect

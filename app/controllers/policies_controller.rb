@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'multipart_parser/reader'
+
 class PoliciesController < RestController
   include FindResource
   include AuthorizeResource
@@ -30,15 +32,13 @@ class PoliciesController < RestController
   protected
 
   def load_policy perform_automatic_deletion:, delete_permitted:, update_permitted:
-    policy_text = request.raw_post
-
     policy_version = PolicyVersion.new \
       role: current_user, policy: resource, policy_text: policy_text
     policy_version.perform_automatic_deletion = perform_automatic_deletion
     policy_version.delete_permitted = delete_permitted
     policy_version.update_permitted = update_permitted
     policy_version.save
-    loader = Loader::Orchestrate.new policy_version
+    loader = Loader::Orchestrate.new policy_version, context: policy_context
     loader.load
 
     created_roles = loader.new_roles.select do |role|
@@ -53,6 +53,52 @@ class PoliciesController < RestController
       created_roles: created_roles,
       version: policy_version.version
     }, status: :created
+  end
+
+  def policy_text
+    case request.content_type
+    when 'multipart/form-data'
+      p multipart_data
+      multipart_data[:policy]
+    else
+      request.raw_post
+    end
+  end
+
+  def policy_context
+    multipart_data.reject { |k,v| k == :policy }
+  end
+
+  def multipart_data
+    @multipart_data ||= parse_multipart_data
+  end
+
+  def parse_multipart_data
+    boundary = MultipartParser::Reader::extract_boundary_value(request.headers['CONTENT_TYPE'])
+    reader = MultipartParser::Reader.new(boundary)
+
+    parts={}
+
+    reader.on_part do |part|
+      pn = part.name.to_sym
+      part.on_data do |partial_data|
+        if parts[pn].nil?
+          parts[pn] = partial_data
+        else
+          parts[pn] = [parts[pn]] unless parts[pn].kind_of?(Array)
+          parts[pn] << partial_data
+        end
+      end
+    end
+
+    reader.on_error do |err|
+      $stderr.puts("Error: #{err}")
+    end
+
+    reader.write request.raw_post.encode(crlf_newline: true)
+    reader.ended? or raise Exception, 'truncated multipart message'
+
+    parts
   end
 
   def find_or_create_root_policy
