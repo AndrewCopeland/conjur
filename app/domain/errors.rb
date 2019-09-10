@@ -272,6 +272,11 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
     end
 
     module Provisioning
+      ProvisionerNotFound = ::Util::TrackableErrorClass.new(
+        msg: "Provisioner '{0-provisioner-name}' is not implemented in Conjur",
+        code: "CONJ00048E"
+      )
+
       module ProvisionerClass
         NotNamedAuthenticator = ::Util::TrackableErrorClass.new(
           msg: "'{0-provisioner-name}' is not a valid provisioner name. " \
