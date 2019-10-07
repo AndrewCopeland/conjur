@@ -261,6 +261,30 @@ unless defined? Errors::Authentication::AuthenticatorNotFound
           code: "CONJ00043E"
         )
       end
+
+      module AuthnJenkins
+
+        HostNotFound = ::Util::TrackableErrorClass.new(
+          msg: "'Invalid Jenkins Cred: {0}",
+          code: "CONJ00045E"
+        )
+
+        RunningJobNotFound=::Util::TrackableErrorClass.new(
+          msg: "Host '{0}' wasn't found'",
+          code: "CONJ00046E"
+        )
+
+        InvalidSignature=::Util::TrackableErrorClass.new(
+          msg: "Job '{0}' is not running and cannot be authenticated",
+          code: "CONJ00047E"
+        )
+        
+        BuildInfoError=::Util::TrackableErrorClass.new(
+          msg: "Invalid signature provided by jenkins. Data tampered or private-public key mismatch",
+          code: "CONJ00048E"
+        )
+
+      end
     end
 
     module Util
