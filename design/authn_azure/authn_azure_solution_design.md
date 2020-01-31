@@ -59,8 +59,8 @@ request is sent to Conjur, the admin will load the authenticator policy:
   id: conjur/authn-azure/prod
   body:
   - !webservice
-    - !variable
-        id: provider-uri # https://sts.windows.net/TENANT_ID
+  - !variable
+    id: provider-uri # https://sts.windows.net/TENANT_ID
   - !group apps
   
   - !permit
@@ -84,11 +84,15 @@ A Conjur host will be defined as follows with their annotations holding Azure-sp
   - !host 
     id: test-app 
     annotations: 
-    authn-azure/subscription-id: test-subscription 
-    authn-azure/resource-group: test-group 
-    authn-azure/user-assigned-identity: test-app-pipeline 
+      authn-azure/subscription-id: test-subscription 
+      authn-azure/resource-group: test-group 
+      authn-azure/user-assigned-identity: test-app-pipeline 
 OR 
-    authn-azure/system-assigned-identity: ie_qWCXhXxt1zIEsu4c7acQVGn4
+      authn-azure/system-assigned-identity: ie_qWCXhXxt1zIEsu4c7acQVGn4
+      
+- !grant
+  role: !group conjur/authn-azure/prod
+  member: !host azure-apps/test-app
 ```
  
 #### Multiple-assigned identity for host - NOT FOR NOW
